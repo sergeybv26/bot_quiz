@@ -11,46 +11,49 @@ def echo(event, vk_api):
     vk_api.messages.send(
         user_id=event.user_id,
         message=event.text,
-        random_id=random.randint(1,1000)
+        random_id=random.randint(1, 1000)
     )
+
 
 def handle_new_question_request(event, vk_api, quiz_elements, redis_client):
-  user_id=event.user_id
-  new_question = random.choice(list(quiz_elements.keys()))
-  redis_client.set(user_id, new_question)
-  vk_api.messages.send(
+    user_id = event.user_id
+    new_question = random.choice(list(quiz_elements.keys()))
+    redis_client.set(user_id, new_question)
+    vk_api.messages.send(
         user_id=event.user_id,
         message=new_question,
-        random_id=random.randint(1,1000)
+        random_id=random.randint(1, 1000)
     )
 
+
 def handle_solution_attempt(event, vk_api, quiz_elements, redis_client):
-  user_id=event.user_id
-  user_message = event.text
-  question = redis_client.get(user_id).decode('utf-8')
-  correct_answer = quiz_elements.get(question)
-  correct_answer = re.sub(r'\([^()]*\)', '', correct_answer)
-  correct_answer = re.sub(r'\.(?!\w)', '', correct_answer)
-  correct_answer = correct_answer.rstrip()
-  match = re.fullmatch(user_message, correct_answer, flags=re.IGNORECASE)
-  if match:
-    vk_api.messages.send(
-        user_id=event.user_id,
-        message='Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»',
-        random_id=random.randint(1,1000)
-    ) 
-  else:
-    vk_api.messages.send(
-        user_id=event.user_id,
-        message='Неправильно… Попробуешь ещё раз?',
-        random_id=random.randint(1,1000)
+    user_id = event.user_id
+    user_message = event.text
+    question = redis_client.get(user_id).decode('utf-8')
+    correct_answer = quiz_elements.get(question)
+    correct_answer = re.sub(r'\([^()]*\)', '', correct_answer)
+    correct_answer = re.sub(r'\.(?!\w)', '', correct_answer)
+    correct_answer = correct_answer.rstrip()
+    match = re.fullmatch(user_message, correct_answer, flags=re.IGNORECASE)
+    if match:
+        vk_api.messages.send(
+            user_id=event.user_id,
+            message='Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»',
+            random_id=random.randint(1, 1000)
+        )
+    else:
+        vk_api.messages.send(
+            user_id=event.user_id,
+            message='Неправильно… Попробуешь ещё раз?',
+            random_id=random.randint(1, 1000)
+
 
 def main(quiz_elements, redis_client):
     vk_token = os.environ['VK_TOKEN']
     vk_session = vk.VkApi(token=vk_token)
     vk_api = vk_session.get_api()
     longpoll = VkLongPoll(vk_session)
-    
+
     keyboard = VkKeyboard(one_time=True)
 
     keyboard.add_button('Новый вопрос', color=VkKeyboardColor.PRIMARY)
@@ -65,10 +68,10 @@ def main(quiz_elements, redis_client):
                 user_id=event.user_id,
                 message='Привет! Я бот для викторин',
                 keyboard=keyboard.get_keyboard(),
-                random_id=random.randint(1,1000)
+                random_id=random.randint(1, 1000)
             )
             echo(event, vk_api)
 
+
 if __name__ == "__main__":
     main()
-          
