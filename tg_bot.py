@@ -2,6 +2,8 @@ import os
 from enum import Enum
 import re
 import random
+
+import redis
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, RegexHandler
 import logging
@@ -73,59 +75,59 @@ def done(bot, update):
 
 
 def main():
-  path_quiz_files = os.environ['QUIZ_FILES_PATH']
-  tg_token = os.environ['TG_TOKEN']
-  redis_pswd = os.environ['REDIS_PASSWORD']
-  redis_client = redis.Redis(
-    host='redis-14680.c302.asia-northeast1-1.gce.cloud.redislabs.com',
-    port=14680,
-    password=redis_pswd)
+    path_quiz_files = os.environ['QUIZ_FILES_PATH']
+    tg_token = os.environ['TG_TOKEN']
+    redis_pswd = os.environ['REDIS_PASSWORD']
+    redis_client = redis.Redis(
+        host='redis-14680.c302.asia-northeast1-1.gce.cloud.redislabs.com',
+        port=14680,
+        password=redis_pswd)
 
-  for filename in os.listdir(path_quiz_files):
-    with open(os.path.join(path_quiz_files, filename), 'r', encoding='koi8-r') as f:
-      content = f.read()
-      content_splitted = re.split("\n{2}", content)
-      question_re = re.compile(r'(\n?Вопрос\s\d+:\n)(.)')
-      answer_re = re.compile(r'(Ответ:\n)(.)')
-      question = ''
-      answer = ''
-      for content_item in content_splitted:
-        question_match = question_re.match(content_item)
-        answer_match = answer_re.match(content_item)
-        question_idx = 0
-        answer_idx = 0
-        if question_match:
-          question_idx = question_match.start(2)
-          question = content_item[question_idx:]
-        if answer_match:
-          answer_idx = answer_match.start(2)
-          answer = content_item[answer_idx:]
-        if question and answer:
-          quiz_elements[question] = answer
-          question = ''
-          answer = ''
-  
-    updater = Updater(tg_token)
+    for filename in os.listdir(path_quiz_files):
+        with open(os.path.join(path_quiz_files, filename), 'r', encoding='koi8-r') as f:
+            content = f.read()
+            content_splitted = re.split("\n{2}", content)
+            question_re = re.compile(r'(\n?Вопрос\s\d+:\n)(.)')
+            answer_re = re.compile(r'(Ответ:\n)(.)')
+            question = ''
+            answer = ''
+            for content_item in content_splitted:
+                question_match = question_re.match(content_item)
+                answer_match = answer_re.match(content_item)
+                question_idx = 0
+                answer_idx = 0
+                if question_match:
+                    question_idx = question_match.start(2)
+                    question = content_item[question_idx:]
+                if answer_match:
+                    answer_idx = answer_match.start(2)
+                    answer = content_item[answer_idx:]
+                if question and answer:
+                    quiz_elements[question] = answer
+                    question = ''
+                    answer = ''
 
-    dp = updater.dispatcher
+        updater = Updater(tg_token)
 
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
-        states={
-            Actions.CHOOSING.value: [RegexHandler('^(Новый вопрос)$',
-                                                  handle_new_question_request),
-                                     RegexHandler('^Сдаться$',
-                                                  handle_capitulate),
-                                     MessageHandler(Filters.text, handle_solution_attempt)]
-        },
-        fallbacks=[RegexHandler('^Мой счет$', done)]
-    )
+        dp = updater.dispatcher
 
-    dp.add_handler(conv_handler)
-    logger.info('Запущен бот для викторин')
-    # Start the Bot
-    updater.start_polling()
-    updater.idle()
+        conv_handler = ConversationHandler(
+            entry_points=[CommandHandler("start", start)],
+            states={
+                Actions.CHOOSING.value: [RegexHandler('^(Новый вопрос)$',
+                                                      handle_new_question_request),
+                                         RegexHandler('^Сдаться$',
+                                                      handle_capitulate),
+                                         MessageHandler(Filters.text, handle_solution_attempt)]
+            },
+            fallbacks=[RegexHandler('^Мой счет$', done)]
+        )
+
+        dp.add_handler(conv_handler)
+        logger.info('Запущен бот для викторин')
+        # Start the Bot
+        updater.start_polling()
+        updater.idle()
 
 
 if __name__ == '__main__':

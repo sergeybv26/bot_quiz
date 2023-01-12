@@ -48,15 +48,16 @@ def handle_solution_attempt(event, vk_api, quiz_elements, redis_client):
             random_id=random.randint(1, 1000)
         )
 
+
 def handle_capitulate(event, vk_api, quiz_elements, redis_client):
     user_id = event.user_id
     question = redis_client.get(user_id).decode('utf-8')
     correct_answer = quiz_elements.get(question)
     vk_api.messages.send(
-            user_id=event.user_id,
-            message=f'Правильный ответ: {correct_answer}',
-            random_id=random.randint(1, 1000)
-        )
+        user_id=event.user_id,
+        message=f'Правильный ответ: {correct_answer}',
+        random_id=random.randint(1, 1000)
+    )
 
     new_question = random.choice(list(quiz_elements.keys()))
     redis_client.set(user_id, new_question)
@@ -65,6 +66,7 @@ def handle_capitulate(event, vk_api, quiz_elements, redis_client):
         message=new_question,
         random_id=random.randint(1, 1000)
     )
+
 
 def main(quiz_elements, redis_client):
     vk_token = os.environ['VK_TOKEN']
