@@ -3,7 +3,9 @@ import re
 
 import redis
 
-from vk_bot import main as vk_bot_start
+import vk_bot
+import tg_bot
+
 
 if __name__ == '__main__':
   path_quiz_files = os.environ['QUIZ_FILES_PATH']
@@ -41,4 +43,5 @@ if __name__ == '__main__':
           quiz_elements[question] = answer
           question = ''
           answer = ''
-  vk_bot_start(quiz_elements, redis_client)
+  vk_bot.main(quiz_elements, redis_client)
+  tg_bot.main(quiz_elements, redis_client)

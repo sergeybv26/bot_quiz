@@ -20,7 +20,7 @@ def handle_new_question_request(event, vk_api, quiz_elements, redis_client):
     new_question = random.choice(list(quiz_elements.keys()))
     redis_client.set(user_id, new_question)
     vk_api.messages.send(
-        user_id=event.user_id,
+        user_id=user_id,
         message=new_question,
         random_id=random.randint(1, 1000)
     )
@@ -37,7 +37,7 @@ def handle_solution_attempt(event, vk_api, quiz_elements, redis_client):
     match = re.fullmatch(user_message, correct_answer, flags=re.IGNORECASE)
     if match:
         vk_api.messages.send(
-            user_id=event.user_id,
+            user_id=user_id,
             message='Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»',
             random_id=random.randint(1, 1000)
         )
@@ -46,7 +46,25 @@ def handle_solution_attempt(event, vk_api, quiz_elements, redis_client):
             user_id=event.user_id,
             message='Неправильно… Попробуешь ещё раз?',
             random_id=random.randint(1, 1000)
+        )
 
+def handle_capitulate(event, vk_api, quiz_elements, redis_client):
+    user_id = event.user_id
+    question = redis_client.get(user_id).decode('utf-8')
+    correct_answer = quiz_elements.get(question)
+    vk_api.messages.send(
+            user_id=event.user_id,
+            message=f'Правильный ответ: {correct_answer}',
+            random_id=random.randint(1, 1000)
+        )
+
+    new_question = random.choice(list(quiz_elements.keys()))
+    redis_client.set(user_id, new_question)
+    vk_api.messages.send(
+        user_id=user_id,
+        message=new_question,
+        random_id=random.randint(1, 1000)
+    )
 
 def main(quiz_elements, redis_client):
     vk_token = os.environ['VK_TOKEN']
@@ -70,8 +88,15 @@ def main(quiz_elements, redis_client):
                 keyboard=keyboard.get_keyboard(),
                 random_id=random.randint(1, 1000)
             )
-            echo(event, vk_api)
+            if event.text == "Новый вопрос":
+                handle_new_question_request(event, vk_api, quiz_elements, redis_client)
+            if event.text == "Сдаться":
+                handle_capitulate(event, vk_api, quiz_elements, redis_client)
+            else:
+                handle_solution_attempt(event, vk_api, quiz_elements, redis_client)
 
 
 if __name__ == "__main__":
-    main()
+    quiz_elements = {}
+    redis_client = None
+    main(quiz_elements, redis_client)
