@@ -21,7 +21,6 @@ class Actions(Enum):
 
 
 quiz_elements = {}
-redis_client = None
 
 
 def start(bot, update):
@@ -78,6 +77,8 @@ def main():
     path_quiz_files = os.environ['QUIZ_FILES_PATH']
     tg_token = os.environ['TG_TOKEN']
     redis_pswd = os.environ['REDIS_PASSWORD']
+
+    global redis_client
     redis_client = redis.Redis(
         host='redis-14680.c302.asia-northeast1-1.gce.cloud.redislabs.com',
         port=14680,
