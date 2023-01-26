@@ -2,20 +2,26 @@ import os
 import re
 
 import redis
+from environs import Env
 
 import vk_bot
 
 if __name__ == '__main__':
-    path_quiz_files = os.environ['QUIZ_FILES_PATH']
-    tg_token = os.environ['TG_TOKEN']
-    redis_pswd = os.environ['REDIS_PASSWORD']
+    env = Env()
+    env.read_env()
+    path_quiz_files = env('QUIZ_FILES_PATH')
+    tg_token = env('TG_TOKEN')
+    vk_token = env('VK_TOKEN')
+    redis_host = env('REDIS_HOST')
+    redis_port = env('REDIS_PORT')
+    redis_pswd = env('REDIS_PASSWORD')
 
     quiz_elements = {}
 
     # init Redis
     redis_client = redis.Redis(
-        host='redis-14680.c302.asia-northeast1-1.gce.cloud.redislabs.com',
-        port=14680,
+        host=redis_host,
+        port=redis_port,
         password=redis_pswd)
 
     for filename in os.listdir(path_quiz_files):
