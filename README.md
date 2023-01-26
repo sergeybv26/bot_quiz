@@ -66,7 +66,7 @@ $ export VK_TOKEN=<Enter your VK token>
 
 Для запуска ботов необходимо в командной строке выполнить команду:
 ```shell
-python3 runner.py
+python3 tg_bot.py
 ```
 
 Ознакомиться с функционалом бота-помощника можно:
