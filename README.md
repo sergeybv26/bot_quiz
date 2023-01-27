@@ -29,8 +29,7 @@ $ source env/bin/activate
 ```
 ### Установка зависимостей
 ```shell
-$ pip3 install poetry
-$ poetry install
+$ pip3 install -r requirements.txt
 ```
 
 ### Получение чувствиетльных данных
