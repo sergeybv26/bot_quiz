@@ -53,19 +53,22 @@ $ pip3 install -r requirements.txt
 * ```TG_TOKEN``` -Токен телеграм-бота
 * ```VK_TOKEN``` - Токен API ВКонтакте
 
-Создать переменные окружения выполнив следующие команды:
+Создать файл .env и записать в него параметры из файла .env.sample
 ```shell
-$ export QUIZ_FILES_PATH=$HOME/bot_quiz/quiz-questions/
-$ export REDIS_PASSWORD=<Enter your Redis password>
-$ export TG_TOKEN=<Enter your Telegram token>
-$ export VK_TOKEN=<Enter your VK token>
+$ touch .env
+$ nano .env
 ```
 
 ### Запуск приложения
 
-Для запуска ботов необходимо в командной строке выполнить команду:
+Для запуска бота Телеграмм необходимо в командной строке выполнить:
 ```shell
-python3 tg_bot.py
+$ python3 tg_bot.py
+```
+
+Для запуска бота ВКонтакте необходимо в командной строке выполнить:
+```shell
+$ python3 vk_bot.py
 ```
 
 Ознакомиться с функционалом бота-помощника можно:
