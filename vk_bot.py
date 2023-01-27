@@ -15,14 +15,6 @@ from log.config import log_config
 logger = logging.getLogger('bot-quiz')
 
 
-def echo(event, vk_api):
-    vk_api.messages.send(
-        user_id=event.user_id,
-        message=event.text,
-        random_id=random.randint(1, 1000)
-    )
-
-
 def handle_new_question_request(event, vk_api, quiz_elements, redis_client):
     user_id = event.user_id
     new_question = random.choice(list(quiz_elements.keys()))
