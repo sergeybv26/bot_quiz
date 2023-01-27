@@ -1,4 +1,5 @@
-import os
+import logging
+import logging.config
 import random
 import re
 
@@ -9,6 +10,9 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
 from file_parser import file_parser
+from log.config import log_config
+
+logger = logging.getLogger('bot-quiz')
 
 
 def echo(event, vk_api):
@@ -80,6 +84,9 @@ def main():
     redis_host = env('REDIS_HOST')
     redis_port = env('REDIS_PORT')
     redis_pswd = env('REDIS_PASSWORD')
+
+    logging.config.dictConfig(log_config)
+    logger.info('ВК-бот запущен')
 
     redis_client = redis.Redis(host=redis_host, port=redis_port, password=redis_pswd)
     quiz_elements = file_parser(path_quiz_files)

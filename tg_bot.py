@@ -1,4 +1,3 @@
-import os
 from enum import Enum
 import re
 import random
@@ -9,15 +8,12 @@ from environs import Env
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, RegexHandler
 import logging
+import logging.config
 
 from file_parser import file_parser
+from log.config import log_config
 
-
-# Enable logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('bot-quiz')
 
 
 class Actions(Enum):
@@ -83,6 +79,9 @@ def main():
     redis_host = env('REDIS_HOST')
     redis_port = env('REDIS_PORT')
     redis_pswd = env('REDIS_PASSWORD')
+
+    logging.config.dictConfig(log_config)
+    logger.info('ТГ-бот запущен')
 
     redis_client = redis.Redis(host=redis_host, port=redis_port, password=redis_pswd)
     quiz_elements = file_parser(path_quiz_files)
