@@ -2,9 +2,13 @@ import os
 import random
 import re
 
+import redis
 import vk_api as vk
+from environs import Env
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
+
+from file_parser import file_parser
 
 
 def echo(event, vk_api):
@@ -68,8 +72,18 @@ def handle_capitulate(event, vk_api, quiz_elements, redis_client):
     )
 
 
-def main(quiz_elements, redis_client):
-    vk_token = os.environ['VK_TOKEN']
+def main():
+    env = Env()
+    env.read_env()
+    path_quiz_files = env('QUIZ_FILES_PATH')
+    vk_token = env('VK_TOKEN')
+    redis_host = env('REDIS_HOST')
+    redis_port = env('REDIS_PORT')
+    redis_pswd = env('REDIS_PASSWORD')
+
+    redis_client = redis.Redis(host=redis_host, port=redis_port, password=redis_pswd)
+    quiz_elements = file_parser(path_quiz_files)
+
     vk_session = vk.VkApi(token=vk_token)
     vk_api = vk_session.get_api()
     longpoll = VkLongPoll(vk_session)
@@ -99,6 +113,4 @@ def main(quiz_elements, redis_client):
 
 
 if __name__ == "__main__":
-    quiz_elements = {}
-    redis_client = None
-    main(quiz_elements, redis_client)
+    main()
